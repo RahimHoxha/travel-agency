@@ -10,6 +10,10 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 
+// import syncfusion from "@syncfusion/ej2-base";
+import { useEffect } from "react";
+// const { registerLicense } = syncfusion;
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -23,7 +27,36 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// registerLicense(import.meta.env.VITE_SYNCFUSION_LICENSE_KEY);
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Move Syncfusion initialization to useEffect
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window !== "undefined") {
+      // Dynamic import to avoid SSR issues
+      import("@syncfusion/ej2-base")
+        .then((syncfusionModule) => {
+          // Syncfusion exports registerLicense as a named export
+          // Try to access it directly from the module
+          const registerLicense = syncfusionModule.registerLicense;
+
+          if (registerLicense && typeof registerLicense === "function") {
+            registerLicense(import.meta.env.VITE_SYNCFUSION_LICENSE_KEY);
+            console.log("Syncfusion license registered successfully");
+          } else {
+            console.error(
+              "registerLicense function not found in @syncfusion/ej2-base module"
+            );
+            console.log("Available exports:", Object.keys(syncfusionModule));
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to load Syncfusion:", error);
+        });
+    }
+  }, []);
+
   return (
     <html lang="en">
       <head>
