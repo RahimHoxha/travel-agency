@@ -28,9 +28,24 @@ export function parseMarkdownToJson(markdownText: string): unknown | null {
 
 export function parseTripData(jsonString: string): Trip | null {
   try {
-    const data: Trip = JSON.parse(jsonString);
+    const data: any = JSON.parse(jsonString);
 
-    return data;
+    // Normalize bestTimeToVisit - convert object to array if needed
+    if (data.bestTimeToVisit && !Array.isArray(data.bestTimeToVisit)) {
+      data.bestTimeToVisit = Object.values(data.bestTimeToVisit);
+    }
+
+    // Normalize weatherInfo - convert object to array if needed
+    if (data.weatherInfo && !Array.isArray(data.weatherInfo)) {
+      data.weatherInfo = Object.values(data.weatherInfo);
+    }
+
+    // Ensure itinerary is an array
+    if (data.itinerary && !Array.isArray(data.itinerary)) {
+      data.itinerary = Object.values(data.itinerary);
+    }
+
+    return data as Trip;
   } catch (error) {
     console.error("Failed to parse trip data:", error);
     return null;
